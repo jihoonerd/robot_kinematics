@@ -4,38 +4,33 @@ import numpy as np
 @dataclass
 class LinkNode:
     """Class for link node info"""
-    name: str
     id: int
-    sister: int
-    child: int
-    mother: int
-    a: np.ndarray # joint axis vector (relative to parent)
-    b: np.ndarray # joint relative position (relative to parent)
-    p: np.ndarray # position in world coordinates
-    q: np.ndarray # joint angle
-    R: np.ndarraytwr # attitude in world coordinates
+    name: str = "Untitled"
+    sister: int = None
+    child: int = None
+    mother: int = None
+
+    a: np.ndarray = None # joint axis vector (relative to parent)
+    b: np.ndarray = None # joint relative position (relative to parent)
+    p: np.ndarray = None # position in world coordinates
+    q: np.ndarray = None # joint angle
+    R: np.ndarray = None # attitude in world coordinates
 
 class RobotObject:
 
     def __init__(self):
         
         self.ulink = {
-            0: LinkNode(name='OP_Middle_Hip', id=0, child=1, sister=0, mother=None),
-            1: LinkNode(name='Spine', id=1, child=2, sister=10, mother=0),
-            2: LinkNode(name='Thorax', id=2, child=3, sister=0, mother=1),
-            3: LinkNode(name='OP_L_Shoulder', id=3, child=4, sister=6, mother=2),
-            4: LinkNode(name='OP_L_Elbow', id=4, child=5, sister=0, mother=3),
-            5: LinkNode(name='OP_L_Wrist', id=5, child=0, sister=0, mother=4),
-            6: LinkNode(name='OP_R_Shoulder', id=6, child=7, sister=9, mother=2),
-            7: LinkNode(name='OP_R_Elbow', id=7, child=8, sister=0, mother=6),
-            8: LinkNode(name='OP_R_Wrist', id=8, child=0, sister=0, mother=7),
-            9: LinkNode(name='OP_Neck', id=9, child=0, sister=0, mother=2),
-            10: LinkNode(name='OP_L_Hip', id=10, child=11, sister=13, mother=0),
-            11: LinkNode(name='OP_L_Knee', id=11, child=12, sister=0, mother=10),
-            12: LinkNode(name='OP_L_Ankle', id=12, child=0, sister=0, mother=11),
-            13: LinkNode(name='OP_R_Hip', id=13, child=14, sister=0, mother=0),
-            14: LinkNode(name='OP_R_Knee', id=14, child=15, sister=0, mother=13),
-            15: LinkNode(name='OP_R_Ankle', id=15, child=0, sister=0, mother=14),
+            0: LinkNode(name="NULL", id=0), # 0 is reserved for NULL
+            1: LinkNode(name='BODY', id=1, child=2, sister=0),
+            2: LinkNode(name='RARM', id=2, child=3, sister=4, mother=1),
+            3: LinkNode(name='RHAND', id=3, child=0, sister=0, mother=2),
+            4: LinkNode(name='LARM', id=4, child=5, sister=6, mother=1),
+            5: LinkNode(name='LHAND', id=5, child=0, sister=0, mother=4),
+            6: LinkNode(name='RLEG', id=6, child=7, sister=8, mother=1),
+            7: LinkNode(name='RFOOT', id=7, child=0, sister=0, mother=6),
+            8: LinkNode(name='LLEG', id=8, child=9, sister=0, mother=1),
+            9: LinkNode(name='LFOOT', id=9, child=0, sister=0, mother=8),
         }
 
     def print_link_name(self, link_id):
@@ -50,17 +45,36 @@ class RobotObject:
         print("Child: ", querying_node.child)
 
     def forward_kinematics(self, node_id):
-       
-        parent = self.ulink[node_id].mother
-        self.ulink[node_id].p = self.ulink[parent.id].R * self.ulink[node_id].b + self.ulink[parent.id].p
-        self.ulink[node_id].R = self.ulink[parent.id].R * self.rodrigues(self.ulink[node_id].a, self.ulink[node_id].q)
 
-        self.forward_kinematics(self.ulink[self.ulink[node_id].sister.id])
-        self.forward_kinematics(self.ulink([self.ulink[node_id].child.id])
+        if node_id == 0: # For end of the kinematic chain. (NULL)
+            return None
+        if node_id != 1: # If node is not body
+            mother = self.ulink[node_id].mother
+            self.ulink[node_id].p = self.ulink[mother.id].R @ self.ulink[node_id].b + self.ulink[mother.id].p
+            self.ulink[node_id].R = self.ulink[mother.id].R @ self.rodrigues(self.ulink[node_id].a, self.ulink[node_id].q)
 
-    def rodrigues(self):
-        return None
-        S
+        self.forward_kinematics(self.ulink[node_id].sister.id)
+        self.forward_kinematics(self.ulink[node_id].child.id)
+
+    def rodrigues(self, w, dt):
+        """This returns SO(3) from so(3)
+
+        Args:
+            w: should be a (3,1) size vector
+            dt ([type]): [description]
+
+        Returns:
+            [type]: [description]
+        """
+        norm_w = np.linalg.norm(w)
+        if norm_w < 1e-10: # TODO: Find more consistent way to manage epsilon
+            R = np.eye(3)
+        else:
+            wn = w/norm_w # rotation axis (unit vector)
+            th = norm_w @ dt # amount of rotation (rad)
+            w_wedge = np.array([[0, -wn[3], wn[2]], [wn[3], 0, -wn[1]], [-wn[2], wn[1], 0]])
+            R = np.eye(3) + w_wedge * np.sin(th) + np.linalg.matrix_power(w_wedge, 2) * (1-np.cos(th))
+        return R
 
 if __name__ == "__main__":
     print()
@@ -68,5 +82,5 @@ if __name__ == "__main__":
     for k, v in ro.ulink.items():
         print(f"{k} : {v.name} {v.id} {v.sister} {v.child} ")
 
-    print(ro.ulink[ro.ulink[0].child].name)
-    print(ro.ulink[ro.ulink[ro.ulink[1].id].sister].name)
+    print(ro.ulink[ro.ulink[2].child].name)
+    print(ro.ulink[ro.ulink[ro.ulink[2].id].sister].name)
