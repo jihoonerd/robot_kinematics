@@ -22,7 +22,7 @@ class RobotObject:
         
         self.ulink = {
             0: LinkNode(name="NULL", id=0), # 0 is reserved for NULL
-            1: LinkNode(name='BODY', id=1, child=2, sister=0),
+            1: LinkNode(name='BODY', id=1, child=2, sister=0, mother=0),
             2: LinkNode(name='RARM', id=2, child=3, sister=4, mother=1),
             3: LinkNode(name='RHAND', id=3, child=0, sister=0, mother=2),
             4: LinkNode(name='LARM', id=4, child=5, sister=6, mother=1),
@@ -45,7 +45,6 @@ class RobotObject:
         print("Child: ", querying_node.child)
 
     def forward_kinematics(self, node_id):
-
         if node_id == 0: # For end of the kinematic chain. (NULL)
             return None
         if node_id != 1: # If node is not body
@@ -75,7 +74,31 @@ class RobotObject:
             w_wedge = np.array([[0, -wn[3], wn[2]], [wn[3], 0, -wn[1]], [-wn[2], wn[1], 0]])
             R = np.eye(3) + w_wedge * np.sin(th) + np.linalg.matrix_power(w_wedge, 2) * (1-np.cos(th))
         return R
+    
+    def inverse_kinematics(self, to, target):
 
+        lmbda = 0.5
+        self.forward_kinematics(1)
+        idx = self.find_route(to)
+        for n in range(1, 11):
+            J = self.calc_jacobian(idx)
+            err = self.calc_vw_err(target, self.ulink[to])
+            if np.linalg.norm(err) < 1e-6:
+                print("IK: Converged")
+                return None
+            dq = lmbda * np.linalg.lstsq(J, err)
+            for nn in range(1, len(idx) + 1):
+                j = idx[nn]
+                self.ulink[j].q = self.ulink[j].q + dq[nn]
+            self.forward_kinematics(1)
+        
+    def find_route(self, to):
+        mother_id = self.ulink[to].mother
+        if to == 1:
+            return [to]
+        else:
+            return np.append([to], self.find_route(mother_id))
+            
 if __name__ == "__main__":
     print()
     ro = RobotObject()
