@@ -98,6 +98,30 @@ class RobotObject:
             return [to]
         else:
             return np.append([to], self.find_route(mother_id))
+    
+    def set_joint_angles(self, idx, q):
+        for n in range(1, len(idx) +1): # TODO: make sure indexing
+            j = idx[n]
+            self.ulink[j].q = q[n]
+        self.forward_kinematics(1)
+
+    def calc_vw_err(self, cref, cnow):
+        perr = cref.p- cnow.p
+        Rerr = np.linalg.inv(cnow.R) @ cref.R
+        werr = cnow.R @ rot2omega(Rerr)
+        return [perr, werr]
+    
+    # def rot2omega(self, R):
+    #     el = np.array([
+    #         [R[2,1] - R[1,2]],
+    #         [R[0,2] - R[2,0]], 
+    #         [R[1,0] - R[0,1]]
+    #         ])
+    #     norm_el = np.linalg.norm(el)
+    #     if norm_el > 1e-10:
+    #         w = np.arct
+        
+    #     return w
             
 if __name__ == "__main__":
     print()
