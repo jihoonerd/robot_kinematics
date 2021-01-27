@@ -87,7 +87,7 @@ class RobotObject:
                 print("IK: Converged")
                 return None
             dq = lmbda * np.linalg.lstsq(J, err)
-            for nn in range(1, len(idx) + 1):
+            for nn in range(1, len(idx) + 1): # TODO: make sure indexing
                 j = idx[nn]
                 self.ulink[j].q = self.ulink[j].q + dq[nn]
             self.forward_kinematics(1)
@@ -106,22 +106,26 @@ class RobotObject:
         self.forward_kinematics(1)
 
     def calc_vw_err(self, cref, cnow):
+        
         perr = cref.p- cnow.p
         Rerr = np.linalg.inv(cnow.R) @ cref.R
-        werr = cnow.R @ rot2omega(Rerr)
+        werr = cnow.R @ self.rot2omega(Rerr)
         return [perr, werr]
     
-    # def rot2omega(self, R):
-    #     el = np.array([
-    #         [R[2,1] - R[1,2]],
-    #         [R[0,2] - R[2,0]], 
-    #         [R[1,0] - R[0,1]]
-    #         ])
-    #     norm_el = np.linalg.norm(el)
-    #     if norm_el > 1e-10:
-    #         w = np.arct
-        
-    #     return w
+    def rot2omega(self, R):
+        el = np.array([
+            [R[2,1] - R[1,2]],
+            [R[0,2] - R[2,0]], 
+            [R[1,0] - R[0,1]]
+            ])
+        norm_el = np.linalg.norm(el)
+        if norm_el > 1e-10:
+            w = np.arctan2(norm_el, np.trace(R)-1) / norm_el @ el
+        elif R[0,0] > 0 & R(1,1) > 0 & R(2,2) > 0:
+            w = np.array([[0, 0, 0]]).T
+        else:
+            w = np.math.pi/2 * np.array([[R[0,0]+1], [R[1,1]+1], [R[2,2]+1]])
+        return w
             
 if __name__ == "__main__":
     print()
