@@ -10,11 +10,12 @@ class LinkNode:
     child: int = None
     mother: int = None
 
-    a: np.ndarray = None  # joint axis vector (relative to parent)
-    b: np.ndarray = None  # joint relative position (relative to parent)
-    p: np.ndarray = None  # position in world coordinates
-    q: np.ndarray = None  # joint angle
-    R: np.ndarray = None  # attitude in world coordinates
+    a: np.ndarray = None  # Joint axis vector (relative to parent)
+    b: np.ndarray = None  # Joint relative position (relative to parent)
+    p: np.ndarray = None  # Position in world coordinates
+    q: np.ndarray = None  # Joint angle
+    R: np.ndarray = None  # Attitude in world coordinates
+    dq: np.float  = None  # Joint Velocity
 
 
 def find_mother(ulink, node_id):

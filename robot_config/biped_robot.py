@@ -1,4 +1,5 @@
 from robot_config.utils import LinkNode, find_mother
+from rk.robot_config import RobotObject
 import numpy as np
 
 ToDeg = 180 / np.math.pi
@@ -22,3 +23,17 @@ biped_ulink[10]= LinkNode(id=10, name='LLEG_J2', sister=0, child=11, b=np.array(
 biped_ulink[11]= LinkNode(id=11, name='LLEG_J3', sister=0, child=12, b=np.array([[0, 0, -0.3]]).T, a=UY, q=0)
 biped_ulink[12]= LinkNode(id=12, name='LLEG_J4', sister=0, child=13, b=np.array([[0, 0, -0.3]]).T, a=UY, q=0)
 biped_ulink[13]= LinkNode(id=13, name='LLEG_J5', sister=0, child= 0, b=np.array([[0, 0, 0]]).T,    a=UX, q=0)
+
+# Find mother through find_mother utility
+biped_ulink_wm = find_mother(biped_ulink, 1)
+biped_ulink_wm[1].p = np.array([[0.0, 0.0, 0.65]]).T
+biped_ulink_wm[1].R = np.eye(3)
+
+biped_ro = RobotObject(biped_ulink_wm)
+biped_ro.forward_kinematics(1)
+
+biped_ro.ulink[1].p = np.array([[0.0, 0.0, 0.65]]).T
+biped_ro.ulink[1].w = np.zeros((3,1))
+
+for i in range(1, len(biped_ro.ulink)):
+    biped_ro.ulink[i].dq = 0

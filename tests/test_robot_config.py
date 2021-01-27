@@ -1,4 +1,5 @@
 from robot_config.biped_robot import biped_ulink
+from rk.robot_config import RobotObject
 from robot_config.utils import find_mother
 
 
@@ -17,3 +18,6 @@ def test_find_mother():
     assert mother_found_ulink[11].mother == 10
     assert mother_found_ulink[12].mother == 11
     assert mother_found_ulink[13].mother == 12
+
+def test_biped_setup():
+    pass
