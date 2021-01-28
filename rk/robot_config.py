@@ -1,20 +1,6 @@
 from dataclasses import dataclass
 import numpy as np
 
-@dataclass
-class LinkNode:
-    """Class for link node info"""
-    id: int
-    name: str = "Untitled"
-    sister: int = None
-    child: int = None
-    mother: int = None
-
-    a: np.ndarray = None # joint axis vector (relative to parent)
-    b: np.ndarray = None # joint relative position (relative to parent)
-    p: np.ndarray = None # position in world coordinates
-    q: np.ndarray = None # joint angle
-    R: np.ndarray = None # attitude in world coordinates
 
 class RobotObject:
 
@@ -36,9 +22,9 @@ class RobotObject:
         if node_id == 0: # For end of the kinematic chain. (NULL)
             return None
         if node_id != 1: # If node is not body
-            mother = self.ulink[node_id].mother
-            self.ulink[node_id].p = self.ulink[mother].R @ self.ulink[node_id].b + self.ulink[mother].p
-            self.ulink[node_id].R = self.ulink[mother].R @ self.rodrigues(self.ulink[node_id].a, self.ulink[node_id].q)
+            mother_id = self.ulink[node_id].mother
+            self.ulink[node_id].p = self.ulink[mother_id].R @ self.ulink[node_id].b + self.ulink[mother_id].p
+            self.ulink[node_id].R = self.ulink[mother_id].R @ self.rodrigues(self.ulink[node_id].a, self.ulink[node_id].q)
 
         self.forward_kinematics(self.ulink[node_id].sister)
         self.forward_kinematics(self.ulink[node_id].child)
