@@ -1,11 +1,15 @@
-from dataclasses import dataclass
+import pickle
+import os
+
 import numpy as np
+from visualize.canvas import Canvas
 
 
 class RobotObject:
 
     def __init__(self, ulink):
         self.ulink = ulink
+        self.canvas = Canvas()
 
     def print_link_name(self, link_id):
         
@@ -18,6 +22,13 @@ class RobotObject:
         print("Sister: ", querying_node.sister)
         print("Child: ", querying_node.child)
 
+    def write_ulink(self):
+        if not os.path.exists('ulink_pkl'):
+            os.mkdir('ulink_pkl')
+        
+        with open(os.path.join('ulink_pkl', 'ulink.pkl'), 'wb') as fp:
+            pickle.dump(self.ulink, fp)
+
     def forward_kinematics(self, node_id):
         if node_id == 0: # For end of the kinematic chain. (NULL)
             return None
@@ -28,6 +39,7 @@ class RobotObject:
 
         self.forward_kinematics(self.ulink[node_id].sister)
         self.forward_kinematics(self.ulink[node_id].child)
+        self.write_ulink()
 
     def rodrigues(self, w, dt):
         """This returns SO(3) from so(3)
@@ -50,7 +62,6 @@ class RobotObject:
         return R
     
     def inverse_kinematics(self, to, target):
-
         lmbda = 0.5
         self.forward_kinematics(1)
         idx = self.find_route(to)
@@ -88,9 +99,9 @@ class RobotObject:
     
     def rot2omega(self, R):
         el = np.array([
-            [R[2,1] - R[1,2]],
-            [R[0,2] - R[2,0]], 
-            [R[1,0] - R[0,1]]
+                [R[2,1] - R[1,2]],
+                [R[0,2] - R[2,0]], 
+                [R[1,0] - R[0,1]]
             ])
         norm_el = np.linalg.norm(el)
         if norm_el > 1e-10:
@@ -100,3 +111,6 @@ class RobotObject:
         else:
             w = np.math.pi/2 * np.array([[R[0,0]+1], [R[1,1]+1], [R[2,2]+1]])
         return w
+
+    def visualize(self):
+        self.canvas.animate()

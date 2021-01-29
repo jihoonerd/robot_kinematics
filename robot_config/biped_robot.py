@@ -9,6 +9,11 @@ UX = np.array([[1, 0, 0]]).T
 UY = np.array([[0, 1, 0]]).T
 UZ = np.array([[0, 0, 1]]).T
 
+# def get_biped_robot(half_sitting=True):
+#   biped_ulink{}
+#   ...
+#   return RO
+
 biped_ulink = {}
 biped_ulink[1] = LinkNode(id=1,  name='BODY'   , sister=0, child= 2, b=np.array([[0, 0, 0.7]]).T,  a=UZ, q=0)
 biped_ulink[2] = LinkNode(id=2,  name='RLEG_J0', sister=8, child= 3, b=np.array([[0, -0.1, 0]]).T, a=UZ, q=0)

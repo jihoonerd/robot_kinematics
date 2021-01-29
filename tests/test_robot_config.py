@@ -1,3 +1,4 @@
+import numpy as np
 from robot_config.biped_robot import biped_ulink
 from rk.robot_config import RobotObject
 from robot_config.utils import find_mother
@@ -20,4 +21,18 @@ def test_find_mother():
     assert mother_found_ulink[13].mother == 12
 
 def test_biped_setup():
-    pass
+    biped_ulink_wm = find_mother(biped_ulink, 1)
+    biped_ulink_wm[1].p = np.array([[0.0, 0.0, 0.65]]).T
+    biped_ulink_wm[1].R = np.eye(3)
+
+    biped_ro = RobotObject(biped_ulink_wm)
+    
+    biped_ro.forward_kinematics(1)
+
+    biped_ro.ulink[1].p = np.array([[0.0, 0.0, 0.65]]).T
+    biped_ro.ulink[1].w = np.zeros((3,1))
+
+    for i in range(1, len(biped_ro.ulink)):
+        biped_ro.ulink[i].dq = 0
+    
+    biped_ro.visualize()
