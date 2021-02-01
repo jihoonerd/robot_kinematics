@@ -52,6 +52,43 @@ class RobotObject:
             R = np.eye(3) + w_wedge * np.sin(th) + np.linalg.matrix_power(w_wedge, 2) * (1-np.cos(th))
         return R
     
+    def inverse_kinematics_LM(self, to, target):
+        """Levenberg-Marquardt, Chan-Lawrence, Sugihara's modification"""
+        idx = self.find_route(to)
+        wn_pos = 1 / 0.3
+        wn_ang = 1 / (2 * np.math.pi)
+        We = np.diag([wn_pos, wn_pos, wn_pos, wn_ang, wn_ang, wn_ang])
+        Wn = np.eye(len(idx))
+
+        self.forward_kinematics(1)
+        err = calc_vw_err(target, self.ulink[to])
+        Ek = err.T @ We @ err
+
+        for i in range(10):
+            J = self.calc_Jacobian(idx)
+            lmbda = Ek + 0.002
+            Jh = J.T @ We @ J + Wn * lmbda
+            
+            gerr = J.T @ We @ err # gk
+            dq = np.linalg.solve(Jh, gerr) # new
+
+            self.move_joints(idx, dq)
+            err = calc_vw_err(target, self.ulink[to])
+            Ek2 = err.T @ We @ err
+
+            if Ek2 < 1e-12:
+                break
+            elif Ek2 < Ek:
+                Ek = Ek2
+            else:
+                self.move_joints(idx, -dq) # revert
+                self.forward_kinematics(1)
+                break
+        
+        err_norm = np.linalg.norm(err)
+        return err_norm
+
+
     def inverse_kinematics(self, to, target):
         lmbda = 0.5
         self.forward_kinematics(1)
@@ -67,7 +104,12 @@ class RobotObject:
                 j = idx[nn]
                 self.ulink[j].q = self.ulink[j].q + dq[nn]
             self.forward_kinematics(1)
-        
+    
+    def move_joints(self, idx, dq):
+        for i in range(len(idx)):
+            j = idx[i]
+            self.ulink[j].q = self.ulink[j].q + dq[i]
+
     def find_route(self, to):
         mother_id = self.ulink[to].mother
         if mother_id == 1:
