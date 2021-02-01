@@ -62,7 +62,7 @@ class RobotObject:
             if np.linalg.norm(err) < 1e-6:
                 print("IK: Converged")
                 return None
-            dq = lmbda * np.linalg.lstsq(J, err, rcond=None)[0]
+            dq = lmbda * np.linalg.solve(J, err)
             for nn in range(len(idx)):
                 j = idx[nn]
                 self.ulink[j].q = self.ulink[j].q + dq[nn]
