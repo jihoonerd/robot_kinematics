@@ -1,17 +1,16 @@
 import pickle
 import os
+from rk.utils import calc_vw_err
 
 import numpy as np
-from visualize.canvas import Canvas
 
 
 class RobotObject:
 
     def __init__(self, ulink):
         self.ulink = ulink
-        self.canvas = Canvas()
 
-    def print_link_name(self, link_id):
+    def print_link_info(self, link_id):
         
         if link_id not in self.ulink.keys():
             return KeyError("Does not have matching link node id.")
@@ -21,13 +20,6 @@ class RobotObject:
         print("NAME: ", querying_node.name)
         print("Sister: ", querying_node.sister)
         print("Child: ", querying_node.child)
-
-    def write_ulink(self):
-        if not os.path.exists('ulink_pkl'):
-            os.mkdir('ulink_pkl')
-        
-        with open(os.path.join('ulink_pkl', 'ulink.pkl'), 'wb') as fp:
-            pickle.dump(self.ulink, fp)
 
     def forward_kinematics(self, node_id):
         if node_id == 0: # For end of the kinematic chain. (NULL)
@@ -39,7 +31,6 @@ class RobotObject:
 
         self.forward_kinematics(self.ulink[node_id].sister)
         self.forward_kinematics(self.ulink[node_id].child)
-        self.write_ulink()
 
     def rodrigues(self, w, dt):
         """This returns SO(3) from so(3)
@@ -66,51 +57,41 @@ class RobotObject:
         self.forward_kinematics(1)
         idx = self.find_route(to)
         for n in range(1, 11):
-            J = self.calc_jacobian(idx)
-            err = self.calc_vw_err(target, self.ulink[to])
+            J = self.calc_Jacobian(idx)
+            err = calc_vw_err(target, self.ulink[to])
             if np.linalg.norm(err) < 1e-6:
                 print("IK: Converged")
                 return None
-            dq = lmbda * np.linalg.lstsq(J, err)
-            for nn in range(1, len(idx) + 1): # TODO: make sure indexing
+            dq = lmbda * np.linalg.lstsq(J, err, rcond=None)[0]
+            for nn in range(len(idx)):
                 j = idx[nn]
                 self.ulink[j].q = self.ulink[j].q + dq[nn]
             self.forward_kinematics(1)
         
     def find_route(self, to):
         mother_id = self.ulink[to].mother
-        if to == 1:
+        if mother_id == 1:
             return [to]
         else:
-            return np.append([to], self.find_route(mother_id))
+            return np.append(self.find_route(mother_id), [to])
     
     def set_joint_angles(self, idx, q):
-        for n in range(1, len(idx) +1): # TODO: make sure indexing
+        for n in range(len(idx)):
             j = idx[n]
             self.ulink[j].q = q[n]
         self.forward_kinematics(1)
-
-    def calc_vw_err(self, cref, cnow):
-        
-        perr = cref.p- cnow.p
-        Rerr = np.linalg.inv(cnow.R) @ cref.R
-        werr = cnow.R @ self.rot2omega(Rerr)
-        return [perr, werr]
     
-    def rot2omega(self, R):
-        el = np.array([
-                [R[2,1] - R[1,2]],
-                [R[0,2] - R[2,0]], 
-                [R[1,0] - R[0,1]]
-            ])
-        norm_el = np.linalg.norm(el)
-        if norm_el > 1e-10:
-            w = np.arctan2(norm_el, np.trace(R)-1) / norm_el @ el
-        elif R[0,0] > 0 & R(1,1) > 0 & R(2,2) > 0:
-            w = np.array([[0, 0, 0]]).T
-        else:
-            w = np.math.pi/2 * np.array([[R[0,0]+1], [R[1,1]+1], [R[2,2]+1]])
-        return w
-
-    def visualize(self):
-        self.canvas.animate()
+    def calc_Jacobian(self, idx):
+        """
+        idx is a return of find_route (list)
+        """
+        jsize = len(idx)
+        target = self.ulink[idx[-1]].p # absolute target position
+        J = np.zeros((6, jsize))
+        for i in range(jsize):
+            j = idx[i]
+            mom = self.ulink[j].mother
+            a = self.ulink[mom].R @ self.ulink[j].a # joint axis in world frame
+            J_i = np.concatenate((np.cross(a.T, (target - self.ulink[j].p).T).T, a))
+            J[:, i] = J_i.squeeze()
+        return J
