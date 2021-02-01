@@ -1,11 +1,11 @@
 import numpy as np
-from robot_config.biped_robot import biped_ulink
+from robot_preset.biped_robot import biped_ro
 from rk.robot_config import RobotObject
-from robot_config.utils import find_mother
+from rk.utils import find_mother
 
 
 def test_find_mother():
-    mother_found_ulink = find_mother(biped_ulink, 1)
+    mother_found_ulink = find_mother(biped_ro.ulink, 1)
     assert mother_found_ulink[1].mother == 0
     assert mother_found_ulink[2].mother == 1
     assert mother_found_ulink[3].mother == 2
@@ -20,19 +20,9 @@ def test_find_mother():
     assert mother_found_ulink[12].mother == 11
     assert mother_found_ulink[13].mother == 12
 
-def test_biped_setup():
-    biped_ulink_wm = find_mother(biped_ulink, 1)
-    biped_ulink_wm[1].p = np.array([[0.0, 0.0, 0.65]]).T
-    biped_ulink_wm[1].R = np.eye(3)
-
-    biped_ro = RobotObject(biped_ulink_wm)
-    
-    biped_ro.forward_kinematics(1)
-
-    biped_ro.ulink[1].p = np.array([[0.0, 0.0, 0.65]]).T
-    biped_ro.ulink[1].w = np.zeros((3,1))
-
-    for i in range(1, len(biped_ro.ulink)):
-        biped_ro.ulink[i].dq = 0
-    
-    biped_ro.visualize()
+def test_jacobian_setting_1():
+    idx = biped_ro.find_route(7)
+    biped_ro.set_joint_angles(idx, [0, 0, -np.math.pi/6, np.math.pi/3, -np.math.pi/6, 0])
+    J = biped_ro.calc_Jacobian(idx)
+    dq = np.linalg.lstsq(J, np.array([0, 0, 0.1, 0, 0, 0]), rcond=None)[0]
+    np.testing.assert_almost_equal(dq , np.array([0, 0, -1/3, 2/3, -1/3, 0]))
