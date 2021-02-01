@@ -26,8 +26,8 @@ class RobotObject:
             return None
         if node_id != 1: # If node is not body
             mother_id = self.ulink[node_id].mother
-            self.ulink[node_id].p = self.ulink[mother_id].R @ self.ulink[node_id].b + self.ulink[mother_id].p
-            self.ulink[node_id].R = self.ulink[mother_id].R @ self.rodrigues(self.ulink[node_id].a, self.ulink[node_id].q)
+            self.ulink[node_id].p = (self.ulink[mother_id].R @ self.ulink[node_id].b + self.ulink[mother_id].p).astype(float)
+            self.ulink[node_id].R = (self.ulink[mother_id].R @ self.rodrigues(self.ulink[node_id].a, self.ulink[node_id].q)).astype(float)
 
         self.forward_kinematics(self.ulink[node_id].sister)
         self.forward_kinematics(self.ulink[node_id].child)
@@ -90,20 +90,23 @@ class RobotObject:
 
 
     def inverse_kinematics(self, to, target):
-        lmbda = 0.5
-        self.forward_kinematics(1)
+        lmbda = 0.9
         idx = self.find_route(to)
-        for n in range(1, 11):
-            J = self.calc_Jacobian(idx)
-            err = calc_vw_err(target, self.ulink[to])
+        self.forward_kinematics(1)
+        err = calc_vw_err(target, self.ulink[to])
+
+        for n in range(10):
             if np.linalg.norm(err) < 1e-6:
                 print("IK: Converged")
-                return None
+                break
+            J = self.calc_Jacobian(idx)
             dq = lmbda * np.linalg.solve(J, err)
-            for nn in range(len(idx)):
-                j = idx[nn]
-                self.ulink[j].q = self.ulink[j].q + dq[nn]
+            self.move_joints(idx, dq)
             self.forward_kinematics(1)
+            err = calc_vw_err(target, self.ulink[to])
+
+        err_norm = np.linalg.norm(err)
+        return err_norm
     
     def move_joints(self, idx, dq):
         for i in range(len(idx)):

@@ -1,9 +1,8 @@
 import copy
 
 import numpy as np
-from rk.robot_config import RobotObject
-from rk.utils import find_mother
-from robot_preset.biped_robot import biped_ro
+from rk.utils import LinkNode, find_mother, rpy2rot, ToRad
+from robot_preset.biped_robot import biped_ro, half_sitting_biped_ro
 
 
 def test_find_mother():
@@ -37,3 +36,29 @@ def test_singular_postures():
     J = ro.calc_Jacobian(idx)
     np.testing.assert_almost_equal(np.linalg.det(J), 8.907937896779329e-18)
     np.testing.assert_equal(np.linalg.matrix_rank(J), 5)
+
+def test_inverse_kinematics_half_sitting():
+    ro = copy.deepcopy(half_sitting_biped_ro)
+    
+    Rfoot = LinkNode(id=-1, name='Rfoot')
+    Rfoot.p = np.array([[-0.3, -0.1, 0]]).T
+    Rfoot.R = rpy2rot(0, ToRad * 20.0, 0)
+    ro.inverse_kinematics(7, Rfoot)
+
+    Lfoot = LinkNode(id=-1, name='Lfoot')
+    Lfoot.p = np.array([[0.3, 0.1, 0]]).T
+    Lfoot.R = rpy2rot(0, -ToRad * 30.0, 0)
+    ro.inverse_kinematics(13, Lfoot)
+
+def test_inverse_kinematics_LM_half_sitting():
+    ro = copy.deepcopy(half_sitting_biped_ro)
+    
+    Rfoot = LinkNode(id=-1, name='Rfoot')
+    Rfoot.p = np.array([[-0.3, -0.1, 0]]).T
+    Rfoot.R = rpy2rot(0, ToRad * 20.0, 0)
+    ro.inverse_kinematics_LM(7, Rfoot)
+
+    Lfoot = LinkNode(id=-1, name='Lfoot')
+    Lfoot.p = np.array([[0.3, 0.1, 0]]).T
+    Lfoot.R = rpy2rot(0, -ToRad * 30.0, 0)
+    ro.inverse_kinematics_LM(13, Lfoot)
