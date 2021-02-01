@@ -58,8 +58,8 @@ def rot2omega(R):
         ])
     norm_el = np.linalg.norm(el)
     if norm_el > 1e-10:
-        w = np.arctan2(norm_el, np.trace(R)-1) / norm_el @ el
-    elif R[0,0] > 0 & R(1,1) > 0 & R(2,2) > 0:
+        w = np.arctan2(norm_el, np.trace(R)-1) / norm_el * el
+    elif R[0,0] > 0 and R[1,1] > 0 and R[2,2] > 0:
         w = np.array([[0, 0, 0]]).T
     else:
         w = np.math.pi/2 * np.array([[R[0,0]+1], [R[1,1]+1], [R[2,2]+1]])
