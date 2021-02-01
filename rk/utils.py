@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 import numpy as np
 
+ToDeg = 180 / np.math.pi
+ToRad = np.math.pi/180
+
 @dataclass
 class LinkNode:
     """Class for link node info"""
@@ -64,7 +67,7 @@ def rot2omega(R):
 
 def calc_vw_err(cref, cnow):
     
-    perr = cref.p- cnow.p
+    perr = cref.p - cnow.p
     Rerr = np.linalg.inv(cnow.R) @ cref.R
     werr = cnow.R @ rot2omega(Rerr)
-    return np.array([[perr], [werr]])
+    return np.concatenate([perr, werr], axis=0)
