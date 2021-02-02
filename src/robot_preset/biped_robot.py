@@ -1,9 +1,9 @@
 import copy
 
 import numpy as np
-from src.rk.robot_config import RobotObject
-from src.rk.utils import LinkNode, find_mother
-from src.rk.utils import ToRad
+from rk.robot_config import RobotObject
+from rk.utils import LinkNode, find_mother
+from rk.utils import ToRad
 
 UX = np.array([[1, 0, 0]]).T
 UY = np.array([[0, 1, 0]]).T
