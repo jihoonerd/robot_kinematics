@@ -1,14 +1,29 @@
-import pickle
+import logging
 import os
-from src.rk.utils import calc_vw_err
+import pickle
+import socket
 
 import numpy as np
+from viz.visualizer import ULINK_FN, VIZ_PATH, PORT, HOST
+from rk.utils import calc_vw_err
+import time
 
 
 class RobotObject:
 
     def __init__(self, ulink):
         self.ulink = ulink
+    
+    def set_socket(self):
+        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.client_socket.connect((HOST, PORT))
+
+    def close_socket(self):
+        self.client_socket
+
+    def visualize_ulink(self):
+        time.sleep(0.2)
+        self.client_socket.sendall(pickle.dumps(self.ulink))
 
     def print_link_info(self, link_id):
         
@@ -84,7 +99,6 @@ class RobotObject:
                 self.move_joints(idx, -dq) # revert
                 self.forward_kinematics(1)
                 break
-        
         err_norm = np.linalg.norm(err)
         return err_norm
 
@@ -105,6 +119,7 @@ class RobotObject:
             self.forward_kinematics(1)
             err = calc_vw_err(target, self.ulink[to])
 
+            self.visualize_ulink()
         err_norm = np.linalg.norm(err)
         return err_norm
     
