@@ -1,8 +1,8 @@
 import copy
 
 import numpy as np
-from rk.utils import LinkNode, find_mother, rpy2rot, ToRad
-from robot_preset.biped_robot import biped_ro, half_sitting_biped_ro
+from src.rk.utils import LinkNode, find_mother, rpy2rot, ToRad
+from src.robot_preset.biped_robot import biped_ro, half_sitting_biped_ro
 
 
 def test_find_mother():
