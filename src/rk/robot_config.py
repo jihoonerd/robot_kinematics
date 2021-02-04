@@ -4,7 +4,7 @@ import pickle
 import socket
 
 import numpy as np
-from viz.visualizer import ULINK_FN, VIZ_PATH, PORT, HOST
+from viz.visualizer import PORT, HOST
 from rk.utils import calc_vw_err
 import time
 

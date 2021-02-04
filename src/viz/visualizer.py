@@ -1,23 +1,16 @@
 #!/usr/bin/python
 import rospy
-import os
+import numpy as np
 from std_msgs.msg import Header, ColorRGBA
 from geometry_msgs.msg import Quaternion, Pose, Point, Vector3
 from visualization_msgs.msg import Marker, MarkerArray
-import pathlib
+from tf.transformations import quaternion_from_euler
 import pickle
 import socket
-import sys
 
-
-VIZ_PATH = pathlib.Path(__file__).parent.absolute()
-ULINK_FN = 'ulink.pkl'
 
 HOST = '127.0.0.1'
 PORT = 3000
-
-if not os.path.exists(VIZ_PATH):
-    pathlib.Path(VIZ_PATH).mkdir(parents=True, exist_ok=True)
 
 def visualizer():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -33,9 +26,11 @@ def visualizer():
     marker_array = MarkerArray()
     while not rospy.is_shutdown():
         ulink = client_socket.recv(1024 * 8)
+
         if ulink:
             data = pickle.loads(ulink)
             for joints in data.values():
+
                 marker = Marker(
                     header=Header(frame_id='my_frame', stamp=rospy.Time.now()),
                     id=joints.id,
@@ -47,6 +42,43 @@ def visualizer():
                     lifetime=rospy.Duration()
                 )
                 marker_array.markers.append(marker)
+
+                # Add gizmos
+
+                x_gizmo = Marker(
+                    header=Header(frame_id='my_frame', stamp=rospy.Time.now()),
+                    id=91,
+                    type=Marker.ARROW,
+                    action=Marker.ADD,
+                    pose=Pose(Point(-2, -2, 0), Quaternion(*quaternion_from_euler(0, 0, 0))),
+                    scale=Vector3(1, 0.1, 0.05),
+                    color=ColorRGBA(1, 0, 0, 1),
+                    lifetime=rospy.Duration()                    
+                )
+                y_gizmo = Marker(
+                    header=Header(frame_id='my_frame', stamp=rospy.Time.now()),
+                    id=92,
+                    type=Marker.ARROW,
+                    action=Marker.ADD,
+                    pose=Pose(Point(-2, -2, 0), Quaternion(*quaternion_from_euler(0, 0, np.math.pi/2))),
+                    scale=Vector3(1, 0.1, 0.05),
+                    color=ColorRGBA(0, 1, 0, 1),
+                    lifetime=rospy.Duration()                    
+                )
+                z_gizmo = Marker(
+                    header=Header(frame_id='my_frame', stamp=rospy.Time.now()),
+                    id=93,
+                    type=Marker.ARROW,
+                    action=Marker.ADD,
+                    pose=Pose(Point(-2, -2, 0), Quaternion(*quaternion_from_euler(0, -np.math.pi/2, 0))),
+                    scale=Vector3(1, 0.1, 0.05),
+                    color=ColorRGBA(0, 0, 1, 1),
+                    lifetime=rospy.Duration()                    
+                )
+
+                marker_array.markers.append(x_gizmo)
+                marker_array.markers.append(y_gizmo)
+                marker_array.markers.append(z_gizmo)
             
             pub.publish(marker_array)
         rate.sleep()
