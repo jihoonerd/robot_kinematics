@@ -3,7 +3,7 @@ import rospy
 import os
 from std_msgs.msg import Header, ColorRGBA
 from geometry_msgs.msg import Quaternion, Pose, Point, Vector3
-from visualization_msgs.msg import Marker
+from visualization_msgs.msg import Marker, MarkerArray
 import pathlib
 import pickle
 import socket
@@ -26,10 +26,11 @@ def visualizer():
     client_socket, addr = server_socket.accept()
     print('Connected by', addr)
 
-    pub = rospy.Publisher('viz_marker', Marker, queue_size=10)
+    pub = rospy.Publisher('viz_marker', MarkerArray, queue_size=10)
     rospy.init_node('viz_node', anonymous=True)
     rate = rospy.Rate(10)
 
+    marker_array = MarkerArray()
     while not rospy.is_shutdown():
         ulink = client_socket.recv(1024 * 8)
         if ulink:
@@ -45,7 +46,9 @@ def visualizer():
                     color=ColorRGBA(1, 0, 0, 1),
                     lifetime=rospy.Duration()
                 )
-                pub.publish(marker)
+                marker_array.markers.append(marker)
+            
+            pub.publish(marker_array)
         rate.sleep()
     
 if __name__ == '__main__':
