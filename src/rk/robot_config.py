@@ -19,7 +19,7 @@ class RobotObject:
         self.client_socket.connect((HOST, PORT))
 
     def close_socket(self):
-        self.client_socket
+        self.client_socket.close()
 
     def visualize_ulink(self):
         time.sleep(0.2)

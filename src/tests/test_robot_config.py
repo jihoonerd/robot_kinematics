@@ -1,6 +1,7 @@
 import copy
 
 import numpy as np
+from numpy.testing._private.utils import assert_almost_equal
 from rk.utils import LinkNode, find_mother, rpy2rot, ToRad
 from robot_preset.biped_robot import biped_ro, half_sitting_biped_ro
 
@@ -49,10 +50,21 @@ def test_inverse_kinematics_half_sitting():
     ro.inverse_kinematics(7, Rfoot)
 
     Lfoot = LinkNode(id=-1, name='Lfoot')
-    Lfoot.p = np.array([[0.3, 0.1, 0]]).T
+    Lfoot.p = np.array([[0.3, 0.1, 0]]).T # 0.4 0.1 0.15
     Lfoot.R = rpy2rot(0, -ToRad * 30.0, 0)
     ro.inverse_kinematics(13, Lfoot)
     ro.close_socket()
+
+    np.testing.assert_almost_equal(
+        ro.ulink[7].p, 
+        np.array([[-0.22863816], [-0.1], [ 0.16902202]])
+    )
+
+    np.testing.assert_almost_equal(
+        ro.ulink[13].p,
+        np.array([[0.22863817], [0.1], [0.169022]])
+    )
+    
 
 def test_inverse_kinematics_LM_half_sitting():
     ro = copy.deepcopy(half_sitting_biped_ro)
