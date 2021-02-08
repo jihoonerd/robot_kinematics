@@ -33,8 +33,7 @@ class RobotObject:
         querying_node = self.ulink[link_id]
         print("ID: ", querying_node.id)
         print("NAME: ", querying_node.name)
-        print("Sister: ", querying_node.sister)
-        print("Child: ", querying_node.child)
+        print("Children: ", querying_node.children)
 
     def forward_kinematics(self, node_id):
         if node_id == 0: # For end of the kinematic chain. (NULL)
@@ -44,9 +43,9 @@ class RobotObject:
             self.ulink[node_id].p = (self.ulink[mother_id].R @ self.ulink[node_id].b + self.ulink[mother_id].p).astype(float)
             self.ulink[node_id].R = (self.ulink[mother_id].R @ self.rodrigues(self.ulink[node_id].a, self.ulink[node_id].q)).astype(float)
 
-        self.forward_kinematics(self.ulink[node_id].sister)
-        self.forward_kinematics(self.ulink[node_id].child)
-
+        for child_id in self.ulink[node_id].children:
+            self.forward_kinematics(child_id)
+            
     def rodrigues(self, w, dt):
         """This returns SO(3) from so(3)
 

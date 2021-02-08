@@ -10,7 +10,7 @@ class LinkNode:
     """Class for link node info"""
     id: int
     name: str = "Untitled"
-    child: List = None
+    children: List = None
     mother: int = None
 
     a: np.ndarray = None  # Joint axis vector (relative to parent)
@@ -26,8 +26,8 @@ def find_mother(ulink, node_id):
     if node_id != 0:  # 0 node_id means NULL
         if node_id == 1:
             ulink[node_id].mother = 0
-        if ulink[node_id].child:  # if child list is not empty
-            for child_id in ulink[node_id].child:
+        if ulink[node_id].children:  # if children list is not empty
+            for child_id in ulink[node_id].children:
                 if child_id == 0:
                     continue
                 ulink[child_id].mother = node_id
