@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import numpy as np
+from typing import List
 
 ToDeg = 180 / np.math.pi
 ToRad = np.math.pi/180
@@ -9,8 +10,7 @@ class LinkNode:
     """Class for link node info"""
     id: int
     name: str = "Untitled"
-    sister: int = None
-    child: int = None
+    child: List = None
     mother: int = None
 
     a: np.ndarray = None  # Joint axis vector (relative to parent)
@@ -22,15 +22,16 @@ class LinkNode:
 
 
 def find_mother(ulink, node_id):
-    if node_id != 0:
+    """It recusrively map mother of kinematic chain. Mostly root id will be given as the node_id"""
+    if node_id != 0:  # 0 node_id means NULL
         if node_id == 1:
             ulink[node_id].mother = 0
-        if ulink[node_id].child != 0:
-            ulink[ulink[node_id].child].mother = node_id
-            find_mother(ulink, ulink[node_id].child)
-        if ulink[node_id].sister != 0:
-            ulink[ulink[node_id].sister].mother = ulink[node_id].mother
-            find_mother(ulink, ulink[node_id].sister)
+        if ulink[node_id].child:  # if child list is not empty
+            for child_id in ulink[node_id].child:
+                if child_id == 0:
+                    continue
+                ulink[child_id].mother = node_id
+                find_mother(ulink, child_id)
     return ulink
 
 def rpy2rot(roll, pitch, yaw):
