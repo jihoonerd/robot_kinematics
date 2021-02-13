@@ -31,7 +31,7 @@ class VizManager:
                     action=Marker.ADD,
                     pose=Pose(Point(0, 0, 0), Quaternion(0, 0, 0, 1)),
                     scale=Vector3(0.1, 0.1, 0.1),
-                    color=ColorRGBA(1, 1, 0, 1),
+                    color=ColorRGBA(1, 1, 0, 0.5),
                     lifetime=rospy.Duration()
                 )
     
@@ -64,7 +64,7 @@ class VizManager:
         self.im_server.applyChanges()
     
     def process_feedback(self, feedback):
-        
+
         x = feedback.pose.position.x
         y = feedback.pose.position.y
         z = feedback.pose.position.z

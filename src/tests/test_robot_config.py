@@ -27,16 +27,12 @@ def test_inverse_kinematics_half_sitting():
     Rfoot = LinkNode(id=-1, name='Rfoot')
     Rfoot.p = np.array([[-0.3, -0.1, 0]]).T
     Rfoot.R = rpy2rot(0, ToRad * 20.0, 0)
-    
-    ro.set_socket()
-
     ro.inverse_kinematics(7, Rfoot)
 
     Lfoot = LinkNode(id=-1, name='Lfoot')
     Lfoot.p = np.array([[0.3, 0.1, 0]]).T # 0.4 0.1 0.15
     Lfoot.R = rpy2rot(0, -ToRad * 30.0, 0)
     ro.inverse_kinematics(13, Lfoot)
-    ro.close_socket()
 
     np.testing.assert_almost_equal(
         ro.ulink[7].p, 
@@ -55,13 +51,9 @@ def test_inverse_kinematics_LM_half_sitting():
     Rfoot = LinkNode(id=-1, name='Rfoot')
     Rfoot.p = np.array([[-0.3, -0.1, 0]]).T
     Rfoot.R = rpy2rot(0, ToRad * 20.0, 0)
-
-    ro.set_socket()
-
     ro.inverse_kinematics_LM(7, Rfoot)
 
     Lfoot = LinkNode(id=-1, name='Lfoot')
     Lfoot.p = np.array([[0.3, 0.1, 0]]).T
     Lfoot.R = rpy2rot(0, -ToRad * 30.0, 0)
     ro.inverse_kinematics_LM(13, Lfoot)
-    ro.close_socket()

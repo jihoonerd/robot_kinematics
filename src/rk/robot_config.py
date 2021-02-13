@@ -14,17 +14,6 @@ class RobotObject:
     def __init__(self, ulink):
         self.ulink = ulink
     
-    def set_socket(self):
-        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_socket.connect((HOST, PORT))
-
-    def close_socket(self):
-        self.client_socket.close()
-
-    def visualize_ulink(self):
-        time.sleep(0.2)
-        self.client_socket.sendall(pickle.dumps(self.ulink))
-
     def print_link_info(self, link_id):
         
         if link_id not in self.ulink.keys():
