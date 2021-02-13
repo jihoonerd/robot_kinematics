@@ -1,8 +1,8 @@
 import copy
 
 import numpy as np
-from rk.utils import LinkNode, rpy2rot, ToRad
-from robot_preset.biped_robot import biped_ro, half_sitting_biped_ro
+from rk.robot_preset.biped_robot import biped_ro, half_sitting_biped_ro
+from rk.utils import LinkNode, ToRad, rpy2rot
 
 
 def test_jacobian_setting():
