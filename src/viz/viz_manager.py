@@ -10,12 +10,17 @@ class VizManager:
 
     def __init__(self):
         self.im_server = None
+        self.ik_target_pub = None
 
         self.init_im_server()
+        self.init_ik_target_pub()
         self.im = dict()
 
     def init_im_server(self):
         self.im_server = InteractiveMarkerServer('im_server')
+    
+    def init_ik_target_pub(self):
+        self.ik_target_pub = rospy.Publisher('rk_api/ik_target', Vector3, queue_size=10)
 
     def add_im(self, name: str):
         self.im[name] = InteractiveMarker(header=Header(frame_id=FRAME_ID), name=name, scale=0.25)
@@ -59,8 +64,17 @@ class VizManager:
         self.im_server.applyChanges()
     
     def process_feedback(self, feedback):
-        s = "Feedback from marker '" + feedback.marker_name
-        s += "' / control '" + feedback.control_name + "'"
+        
+        x = feedback.pose.position.x
+        y = feedback.pose.position.y
+        z = feedback.pose.position.z
+
+        target_pos = Vector3(x, y, z)
+        self.ik_target_pub.publish(target_pos)
+
+        s = "Marker Name: " + feedback.marker_name
+        s += " / control: " + feedback.control_name
+        s += " / position " + f"{x}, {y}, {z}"
         print(s)
         
 

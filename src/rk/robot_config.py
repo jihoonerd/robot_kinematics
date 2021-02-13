@@ -117,8 +117,6 @@ class RobotObject:
             self.move_joints(idx, dq)
             self.forward_kinematics(1)
             err = calc_vw_err(target, self.ulink[to])
-
-            self.visualize_ulink()
         err_norm = np.linalg.norm(err)
         return err_norm
     
