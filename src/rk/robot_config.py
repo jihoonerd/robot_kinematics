@@ -4,7 +4,7 @@ import pickle
 import socket
 
 import numpy as np
-from viz.visualizer import ULINK_FN, VIZ_PATH, PORT, HOST
+from viz.visualizer import PORT, HOST
 from rk.utils import calc_vw_err
 import time
 
@@ -14,17 +14,6 @@ class RobotObject:
     def __init__(self, ulink):
         self.ulink = ulink
     
-    def set_socket(self):
-        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_socket.connect((HOST, PORT))
-
-    def close_socket(self):
-        self.client_socket
-
-    def visualize_ulink(self):
-        time.sleep(0.2)
-        self.client_socket.sendall(pickle.dumps(self.ulink))
-
     def print_link_info(self, link_id):
         
         if link_id not in self.ulink.keys():
@@ -33,8 +22,7 @@ class RobotObject:
         querying_node = self.ulink[link_id]
         print("ID: ", querying_node.id)
         print("NAME: ", querying_node.name)
-        print("Sister: ", querying_node.sister)
-        print("Child: ", querying_node.child)
+        print("Children: ", querying_node.children)
 
     def forward_kinematics(self, node_id):
         if node_id == 0: # For end of the kinematic chain. (NULL)
@@ -44,9 +32,9 @@ class RobotObject:
             self.ulink[node_id].p = (self.ulink[mother_id].R @ self.ulink[node_id].b + self.ulink[mother_id].p).astype(float)
             self.ulink[node_id].R = (self.ulink[mother_id].R @ self.rodrigues(self.ulink[node_id].a, self.ulink[node_id].q)).astype(float)
 
-        self.forward_kinematics(self.ulink[node_id].sister)
-        self.forward_kinematics(self.ulink[node_id].child)
-
+        for child_id in self.ulink[node_id].children:
+            self.forward_kinematics(child_id)
+            
     def rodrigues(self, w, dt):
         """This returns SO(3) from so(3)
 
@@ -118,8 +106,6 @@ class RobotObject:
             self.move_joints(idx, dq)
             self.forward_kinematics(1)
             err = calc_vw_err(target, self.ulink[to])
-
-            self.visualize_ulink()
         err_norm = np.linalg.norm(err)
         return err_norm
     

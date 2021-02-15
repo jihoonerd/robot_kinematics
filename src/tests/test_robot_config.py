@@ -1,25 +1,9 @@
 import copy
 
 import numpy as np
-from rk.utils import LinkNode, find_mother, rpy2rot, ToRad
-from robot_preset.biped_robot import biped_ro, half_sitting_biped_ro
+from rk.robot_preset.biped_robot import biped_ro, half_sitting_biped_ro
+from rk.utils import LinkNode, ToRad, rpy2rot
 
-
-def test_find_mother():
-    mother_found_ulink = find_mother(biped_ro.ulink, 1)
-    assert mother_found_ulink[1].mother == 0
-    assert mother_found_ulink[2].mother == 1
-    assert mother_found_ulink[3].mother == 2
-    assert mother_found_ulink[4].mother == 3
-    assert mother_found_ulink[5].mother == 4
-    assert mother_found_ulink[6].mother == 5
-    assert mother_found_ulink[7].mother == 6
-    assert mother_found_ulink[8].mother == 1
-    assert mother_found_ulink[9].mother == 8
-    assert mother_found_ulink[10].mother == 9
-    assert mother_found_ulink[11].mother == 10
-    assert mother_found_ulink[12].mother == 11
-    assert mother_found_ulink[13].mother == 12
 
 def test_jacobian_setting():
     ro = copy.deepcopy(biped_ro)
@@ -43,16 +27,23 @@ def test_inverse_kinematics_half_sitting():
     Rfoot = LinkNode(id=-1, name='Rfoot')
     Rfoot.p = np.array([[-0.3, -0.1, 0]]).T
     Rfoot.R = rpy2rot(0, ToRad * 20.0, 0)
-    
-    ro.set_socket()
-
     ro.inverse_kinematics(7, Rfoot)
 
     Lfoot = LinkNode(id=-1, name='Lfoot')
     Lfoot.p = np.array([[0.3, 0.1, 0]]).T
     Lfoot.R = rpy2rot(0, -ToRad * 30.0, 0)
     ro.inverse_kinematics(13, Lfoot)
-    ro.close_socket()
+
+    np.testing.assert_almost_equal(
+        ro.ulink[7].p, 
+        np.array([[-0.22863816], [-0.1], [ 0.16902202]])
+    )
+
+    np.testing.assert_almost_equal(
+        ro.ulink[13].p,
+        np.array([[0.22863817], [0.1], [0.169022]])
+    )
+    
 
 def test_inverse_kinematics_LM_half_sitting():
     ro = copy.deepcopy(half_sitting_biped_ro)
@@ -60,13 +51,9 @@ def test_inverse_kinematics_LM_half_sitting():
     Rfoot = LinkNode(id=-1, name='Rfoot')
     Rfoot.p = np.array([[-0.3, -0.1, 0]]).T
     Rfoot.R = rpy2rot(0, ToRad * 20.0, 0)
-
-    ro.set_socket()
-
     ro.inverse_kinematics_LM(7, Rfoot)
 
     Lfoot = LinkNode(id=-1, name='Lfoot')
     Lfoot.p = np.array([[0.3, 0.1, 0]]).T
     Lfoot.R = rpy2rot(0, -ToRad * 30.0, 0)
     ro.inverse_kinematics_LM(13, Lfoot)
-    ro.close_socket()
