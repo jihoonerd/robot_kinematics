@@ -1,0 +1,2 @@
+string link_id
+geometry_msgs/Vector3 target_pos

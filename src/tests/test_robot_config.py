@@ -30,7 +30,7 @@ def test_inverse_kinematics_half_sitting():
     ro.inverse_kinematics(7, Rfoot)
 
     Lfoot = LinkNode(id=-1, name='Lfoot')
-    Lfoot.p = np.array([[0.3, 0.1, 0]]).T # 0.4 0.1 0.15
+    Lfoot.p = np.array([[0.3, 0.1, 0]]).T
     Lfoot.R = rpy2rot(0, -ToRad * 30.0, 0)
     ro.inverse_kinematics(13, Lfoot)
 

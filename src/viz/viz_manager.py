@@ -22,7 +22,7 @@ class VizManager:
     def init_ik_target_pub(self):
         self.ik_target_pub = rospy.Publisher('rk_api/ik_target', Vector3, queue_size=10)
 
-    def add_im(self, name: str):
+    def add_ik_target(self, name: str):
         self.im[name] = InteractiveMarker(header=Header(frame_id=FRAME_ID), name=name, scale=0.25)
 
         box_marker = Marker(
@@ -74,7 +74,7 @@ class VizManager:
 
         s = "Marker Name: " + feedback.marker_name
         s += " / control: " + feedback.control_name
-        s += " / position " + f"{x}, {y}, {z}"
+        s += " / position: " + f"({x}, {y}, {z})"
         print(s)
         
 

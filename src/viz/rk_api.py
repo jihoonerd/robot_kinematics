@@ -10,7 +10,7 @@ from rk.utils import LinkNode, ToRad, rpy2rot
 from viz.utils import ulink_to_marker_array
 from viz.viz_manager import VizManager
 
-ik_target_pos = np.array([[0.3, 0.1, 0]]).T
+ik_target_pos = np.array([[0, 0, 0]]).T
 
 def callback(data):
     global ik_target_pos
@@ -21,14 +21,17 @@ def rk_api():
     ro = copy.deepcopy(half_sitting_biped_ro)
 
     pub = rospy.Publisher('rk_api/joint', MarkerArray, queue_size=10)
-    sub = rospy.Subscriber('rk_api/ik_target', Vector3, callback=callback)
+    sub = rospy.Subscriber('rk_api/ik_target', IKMarker, callback=callback) # use custom message
 
     viz_manager = VizManager()
-    viz_manager.add_im('LFoot')
+    viz_manager.add_ik_target('LFoot')
+
     Lfoot = LinkNode(id=-1, name='Lfoot')
     Lfoot.p = np.array([[0.3, 0.1, 0]]).T
     Lfoot.R = rpy2rot(0, -ToRad * 30.0, 0)
+
     rate = rospy.Rate(10)
+
     while not rospy.is_shutdown():
 
         Lfoot.p = ik_target_pos
