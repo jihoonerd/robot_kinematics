@@ -4,6 +4,7 @@ from interactive_markers.interactive_marker_server import InteractiveMarkerServe
 from viz.visualizer import FRAME_ID
 from std_msgs.msg import Header, ColorRGBA
 from geometry_msgs.msg import Quaternion, Pose, Point, Vector3
+from robot_kinematics.msg import IKMarker
 
 
 class VizManager:
@@ -20,7 +21,7 @@ class VizManager:
         self.im_server = InteractiveMarkerServer('im_server')
     
     def init_ik_target_pub(self):
-        self.ik_target_pub = rospy.Publisher('rk_api/ik_target', Vector3, queue_size=10)
+        self.ik_target_pub = rospy.Publisher('rk_api/ik_target', IKMarker, queue_size=10)
 
     def add_ik_target(self, name: str):
         self.im[name] = InteractiveMarker(header=Header(frame_id=FRAME_ID), name=name, scale=0.25)
@@ -64,13 +65,15 @@ class VizManager:
         self.im_server.applyChanges()
     
     def process_feedback(self, feedback):
+        print(feedback)
 
         x = feedback.pose.position.x
         y = feedback.pose.position.y
         z = feedback.pose.position.z
 
+        link_id = "ID SHOULD BE AT HERE"
         target_pos = Vector3(x, y, z)
-        self.ik_target_pub.publish(target_pos)
+        self.ik_target_pub.publish(IKMarker(link_id, target_pos))
 
         s = "Marker Name: " + feedback.marker_name
         s += " / control: " + feedback.control_name

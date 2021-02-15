@@ -3,18 +3,23 @@ import copy
 
 import numpy as np
 import rospy
-from geometry_msgs.msg import Point, Pose, Quaternion, Vector3
+from robot_kinematics.msg import IKMarker
 from rk.robot_preset.biped_robot import half_sitting_biped_ro
 from visualization_msgs.msg import MarkerArray
 from rk.utils import LinkNode, ToRad, rpy2rot
 from viz.utils import ulink_to_marker_array
 from viz.viz_manager import VizManager
 
+
 ik_target_pos = np.array([[0, 0, 0]]).T
 
 def callback(data):
     global ik_target_pos
-    ik_target_pos = np.array([[data.x, data.y, data.z]]).T
+    link_id = data.link_id
+    target_pos = data.target_pos
+    print(link_id)
+    print(target_pos)
+    ik_target_pos = np.array([[target_pos.x, target_pos.y, target_pos.z]]).T
 
 def rk_api():
     rospy.init_node('rk_pub')
