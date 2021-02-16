@@ -99,7 +99,7 @@ class RobotObject:
 
         for n in range(10):
             if np.linalg.norm(err) < 1e-6:
-                print("IK: Converged")
+                print(f"ID: {to} / IK: Converged")
                 break
             J = self.calc_Jacobian(idx)
             dq = lmbda * np.linalg.solve(J, err)

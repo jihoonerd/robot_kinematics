@@ -65,21 +65,11 @@ class VizManager:
         self.im_server.applyChanges()
     
     def process_feedback(self, feedback):
-        print(feedback)
-
+        link_id = feedback.marker_name
         x = feedback.pose.position.x
         y = feedback.pose.position.y
         z = feedback.pose.position.z
-
-        link_id = "ID SHOULD BE AT HERE"
         target_pos = Vector3(x, y, z)
         self.ik_target_pub.publish(IKMarker(link_id, target_pos))
-
-        s = "Marker Name: " + feedback.marker_name
-        s += " / control: " + feedback.control_name
-        s += " / position: " + f"({x}, {y}, {z})"
-        print(s)
-        
-
     
         
