@@ -19,6 +19,8 @@ class LinkNode:
     q: np.ndarray = None  # Joint angle
     R: np.ndarray = None  # Attitude in world coordinates
     dq: np.float  = None  # Joint Velocity
+    v: np.ndarray = None  # Linear Velocity in World Coordinate
+    w: np.ndarray = None  # Angular Velocity in World Coordinates
 
 
 def find_mother(ulink, node_id):
@@ -72,3 +74,23 @@ def calc_vw_err(cref, cnow):
     Rerr = np.linalg.inv(cnow.R) @ cref.R
     werr = cnow.R @ rot2omega(Rerr)
     return np.concatenate([perr, werr], axis=0)
+
+def rodrigues(w, dt):
+    """This returns SO(3) from so(3)
+
+    Args:
+        w: should be a (3,1) size vector
+        dt ([type]): [description]
+
+    Returns:
+        [type]: [description]
+    """
+    norm_w = np.linalg.norm(w)
+    if norm_w < 1e-10: # TODO: Find more consistent way to manage epsilon
+        R = np.eye(3)
+    else:
+        wn = w/norm_w # rotation axis (unit vector)
+        th = norm_w * dt # amount of rotation (rad)
+        w_wedge = np.array([[0, -wn[2], wn[1]], [wn[2], 0, -wn[0]], [-wn[1], wn[0], 0]])
+        R = np.eye(3) + w_wedge * np.sin(th) + np.linalg.matrix_power(w_wedge, 2) * (1-np.cos(th))
+    return R

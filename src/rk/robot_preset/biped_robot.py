@@ -32,7 +32,7 @@ biped_ulink_wm[1].R = np.eye(3)
 biped_ro = RobotObject(biped_ulink_wm)
 biped_ro.forward_kinematics(1)
 
-biped_ro.ulink[1].p = np.array([[0.0, 0.0, 0.65]]).T
+biped_ro.ulink[1].v = np.zeros((3,1))
 biped_ro.ulink[1].w = np.zeros((3,1))
 
 for i in range(1, len(biped_ro.ulink)):

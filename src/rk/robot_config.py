@@ -1,12 +1,5 @@
-import logging
-import os
-import pickle
-import socket
-
 import numpy as np
-from viz.visualizer import PORT, HOST
-from rk.utils import calc_vw_err
-import time
+from rk.utils import calc_vw_err, rodrigues
 
 
 class RobotObject:
@@ -30,31 +23,11 @@ class RobotObject:
         if node_id != 1: # If node is not body
             mother_id = self.ulink[node_id].mother
             self.ulink[node_id].p = (self.ulink[mother_id].R @ self.ulink[node_id].b + self.ulink[mother_id].p).astype(float)
-            self.ulink[node_id].R = (self.ulink[mother_id].R @ self.rodrigues(self.ulink[node_id].a, self.ulink[node_id].q)).astype(float)
+            self.ulink[node_id].R = (self.ulink[mother_id].R @ rodrigues(self.ulink[node_id].a, self.ulink[node_id].q)).astype(float)
 
         for child_id in self.ulink[node_id].children:
             self.forward_kinematics(child_id)
             
-    def rodrigues(self, w, dt):
-        """This returns SO(3) from so(3)
-
-        Args:
-            w: should be a (3,1) size vector
-            dt ([type]): [description]
-
-        Returns:
-            [type]: [description]
-        """
-        norm_w = np.linalg.norm(w)
-        if norm_w < 1e-10: # TODO: Find more consistent way to manage epsilon
-            R = np.eye(3)
-        else:
-            wn = w/norm_w # rotation axis (unit vector)
-            th = norm_w * dt # amount of rotation (rad)
-            w_wedge = np.array([[0, -wn[2], wn[1]], [wn[2], 0, -wn[0]], [-wn[1], wn[0], 0]])
-            R = np.eye(3) + w_wedge * np.sin(th) + np.linalg.matrix_power(w_wedge, 2) * (1-np.cos(th))
-        return R
-    
     def inverse_kinematics_LM(self, to, target):
         """Levenberg-Marquardt, Chan-Lawrence, Sugihara's modification"""
         idx = self.find_route(to)
@@ -67,7 +40,7 @@ class RobotObject:
         err = calc_vw_err(target, self.ulink[to])
         Ek = err.T @ We @ err
 
-        for i in range(10):
+        for _ in range(10):
             J = self.calc_Jacobian(idx)
             lmbda = Ek + 0.002
             Jh = J.T @ We @ J + Wn * lmbda
@@ -76,6 +49,7 @@ class RobotObject:
             dq = np.linalg.solve(Jh, gerr) # new
 
             self.move_joints(idx, dq)
+            self.forward_kinematics(1)
             err = calc_vw_err(target, self.ulink[to])
             Ek2 = err.T @ We @ err
 
@@ -90,7 +64,6 @@ class RobotObject:
         err_norm = np.linalg.norm(err)
         return err_norm
 
-
     def inverse_kinematics(self, to, target):
         lmbda = 0.9
         idx = self.find_route(to)
@@ -99,7 +72,6 @@ class RobotObject:
 
         for n in range(10):
             if np.linalg.norm(err) < 1e-6:
-                print(f"ID: {to} / IK: Converged")
                 break
             J = self.calc_Jacobian(idx)
             dq = lmbda * np.linalg.solve(J, err)

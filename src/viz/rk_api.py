@@ -16,8 +16,6 @@ ik_target = dict()
 def callback(data):
     global ik_target
     ik_target[data.link_id] = np.array([[data.target_pos.x, data.target_pos.y, data.target_pos.z]]).T
-    print("[SUBSCRIBER MESSAGE]")
-    print(ik_target)
 
 def rk_api():
     rospy.init_node('rk_pub')
@@ -36,7 +34,7 @@ def rk_api():
 
         if ik_target:
             for link_id in ik_target:
-                ro.inverse_kinematics(int(link_id), LinkNode(id=-1, name=link_id + '_target', p=ik_target[link_id], R=rpy2rot(0, -ToRad * 30.0, 0)))
+                ro.inverse_kinematics_LM(int(link_id), LinkNode(id=-1, name=link_id + '_target', p=ik_target[link_id], R=rpy2rot(0, 0, 0)))
 
         marker_array = ulink_to_marker_array(ro.ulink)
         pub.publish(marker_array)
