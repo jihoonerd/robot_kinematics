@@ -3,7 +3,6 @@ import copy
 import numpy as np
 from rk.robot_config import RobotObject
 from rk.utils import LinkNode, find_mother
-from rk.utils import ToRad
 
 UX = np.array([[1, 0, 0]]).T
 UY = np.array([[0, 1, 0]]).T
@@ -42,11 +41,11 @@ for i in range(1, len(biped_ro.ulink)):
 half_sitting_biped_ro = copy.deepcopy(biped_ro)
 
 # Gohalfsitting
-half_sitting_biped_ro.ulink[4].q = -5.0 * ToRad
-half_sitting_biped_ro.ulink[5].q = 10.0 * ToRad
-half_sitting_biped_ro.ulink[6].q = -5.0 * ToRad
-half_sitting_biped_ro.ulink[10].q = -5.0 * ToRad
-half_sitting_biped_ro.ulink[11].q = 10.0 * ToRad
-half_sitting_biped_ro.ulink[12].q = -5.0 * ToRad
+half_sitting_biped_ro.ulink[4].q = np.radians(-5.0)
+half_sitting_biped_ro.ulink[5].q = np.radians(10.0)
+half_sitting_biped_ro.ulink[6].q = np.radians(-5.0)
+half_sitting_biped_ro.ulink[10].q = np.radians(-5.0)
+half_sitting_biped_ro.ulink[11].q = np.radians(10.0)
+half_sitting_biped_ro.ulink[12].q = np.radians(-5.0)
 half_sitting_biped_ro.ulink[1].p = np.array([[0.0, 0.0, 0.7]]).T
 half_sitting_biped_ro.ulink[1].R = np.eye(3)

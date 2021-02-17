@@ -2,8 +2,6 @@ from dataclasses import dataclass
 import numpy as np
 from typing import List
 
-ToDeg = 180 / np.math.pi
-ToRad = np.math.pi/180
 
 @dataclass
 class LinkNode:

@@ -1,6 +1,5 @@
 import numpy as np
-from numpy.testing._private.utils import assert_almost_equal
-from rk.utils import LinkNode, find_mother, rpy2rot, ToRad
+from rk.utils import LinkNode, find_mother
 import pytest
 
 @pytest.fixture

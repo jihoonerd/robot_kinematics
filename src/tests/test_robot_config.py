@@ -2,8 +2,7 @@ import copy
 
 import numpy as np
 from rk.robot_preset.biped_robot import biped_ro, half_sitting_biped_ro
-from rk.utils import LinkNode, ToRad, rpy2rot, find_route
-
+from rk.utils import LinkNode, rpy2rot, find_route
 
 def test_jacobian_setting():
     ro = copy.deepcopy(biped_ro)
@@ -26,12 +25,12 @@ def test_inverse_kinematics_half_sitting():
     
     Rfoot = LinkNode(id=-1, name='Rfoot')
     Rfoot.p = np.array([[-0.3, -0.1, 0]]).T
-    Rfoot.R = rpy2rot(0, ToRad * 20.0, 0)
+    Rfoot.R = rpy2rot(0, np.radians(20.0), 0)
     ro.inverse_kinematics(7, Rfoot)
 
     Lfoot = LinkNode(id=-1, name='Lfoot')
     Lfoot.p = np.array([[0.3, 0.1, 0]]).T
-    Lfoot.R = rpy2rot(0, -ToRad * 30.0, 0)
+    Lfoot.R = rpy2rot(0, np.radians(-30.0), 0)
     ro.inverse_kinematics(13, Lfoot)
 
     np.testing.assert_almost_equal(
@@ -50,12 +49,12 @@ def test_inverse_kinematics_LM_half_sitting():
     
     Rfoot = LinkNode(id=-1, name='Rfoot')
     Rfoot.p = np.array([[-0.3, -0.1, 0]]).T
-    Rfoot.R = rpy2rot(0, ToRad * 20.0, 0)
+    Rfoot.R = rpy2rot(0, np.radians(20.0), 0)
     ro.inverse_kinematics_LM(7, Rfoot)
 
     Lfoot = LinkNode(id=-1, name='Lfoot')
     Lfoot.p = np.array([[0.3, 0.1, 0]]).T
-    Lfoot.R = rpy2rot(0, -ToRad * 30.0, 0)
+    Lfoot.R = rpy2rot(0, np.radians(-30.0), 0)
     ro.inverse_kinematics_LM(13, Lfoot)
 
     np.testing.assert_almost_equal(
