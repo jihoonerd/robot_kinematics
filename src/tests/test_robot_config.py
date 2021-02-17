@@ -57,3 +57,13 @@ def test_inverse_kinematics_LM_half_sitting():
     Lfoot.p = np.array([[0.3, 0.1, 0]]).T
     Lfoot.R = rpy2rot(0, -ToRad * 30.0, 0)
     ro.inverse_kinematics_LM(13, Lfoot)
+
+    np.testing.assert_almost_equal(
+        ro.ulink[7].p, 
+        np.array([[-0.23635643], [-0.1], [0.14851507]])
+    )
+
+    np.testing.assert_almost_equal(
+        ro.ulink[13].p,
+        np.array([[0.23635229], [0.1], [0.14851329]])
+    )
