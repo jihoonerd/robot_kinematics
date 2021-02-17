@@ -13,6 +13,8 @@ class LinkNode:
     children: List = None
     mother: int = None
 
+    is_leaf: bool = False
+
     a: np.ndarray = None  # Joint axis vector (relative to parent)
     b: np.ndarray = None  # Joint relative position (relative to parent)
     p: np.ndarray = None  # Position in world coordinates
@@ -94,3 +96,10 @@ def rodrigues(w, dt):
         w_wedge = np.array([[0, -wn[2], wn[1]], [wn[2], 0, -wn[0]], [-wn[1], wn[0], 0]])
         R = np.eye(3) + w_wedge * np.sin(th) + np.linalg.matrix_power(w_wedge, 2) * (1-np.cos(th))
     return R
+
+def find_route(ulink, query):
+    mother_id = ulink[query].mother
+    if mother_id == 1:
+        return [query]
+    else:
+        return np.append(find_route(ulink, mother_id), [query])

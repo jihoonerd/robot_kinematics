@@ -1,5 +1,5 @@
 import numpy as np
-from rk.utils import calc_vw_err, rodrigues
+from rk.utils import calc_vw_err, rodrigues, find_route
 
 
 class RobotObject:
@@ -30,7 +30,7 @@ class RobotObject:
             
     def inverse_kinematics_LM(self, to, target):
         """Levenberg-Marquardt, Chan-Lawrence, Sugihara's modification"""
-        idx = self.find_route(to)
+        idx = find_route(self.ulink, to)
         wn_pos = 1 / 0.3
         wn_ang = 1 / (2 * np.math.pi)
         We = np.diag([wn_pos, wn_pos, wn_pos, wn_ang, wn_ang, wn_ang])
@@ -66,7 +66,7 @@ class RobotObject:
 
     def inverse_kinematics(self, to, target):
         lmbda = 0.9
-        idx = self.find_route(to)
+        idx = find_route(self.ulink, to)
         self.forward_kinematics(1)
         err = calc_vw_err(target, self.ulink[to])
 
@@ -86,13 +86,6 @@ class RobotObject:
             j = idx[i]
             self.ulink[j].q = self.ulink[j].q + dq[i]
 
-    def find_route(self, to):
-        mother_id = self.ulink[to].mother
-        if mother_id == 1:
-            return [to]
-        else:
-            return np.append(self.find_route(mother_id), [to])
-    
     def set_joint_angles(self, idx, q):
         for n in range(len(idx)):
             j = idx[n]
