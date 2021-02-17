@@ -2,7 +2,7 @@ from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import Quaternion, Pose, Point, Vector3
 
 from std_msgs.msg import Header, ColorRGBA
-from viz.visualizer import FRAME_ID
+from viz import FRAME_ID
 from rk.utils import find_route
 import rospy
 import numpy as np

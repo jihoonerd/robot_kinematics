@@ -6,7 +6,7 @@ import rospy
 from robot_kinematics.msg import IKMarker
 from rk.robot_preset.biped_robot import half_sitting_biped_ro
 from visualization_msgs.msg import MarkerArray
-from rk.utils import LinkNode, ToRad, rpy2rot
+from rk.utils import LinkNode, rpy2rot
 from viz.utils import ulink_to_marker_array
 from viz.viz_manager import VizManager
 

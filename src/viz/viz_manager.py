@@ -1,10 +1,12 @@
 import rospy
-from visualization_msgs.msg import Marker, MarkerArray, InteractiveMarkerControl
-from interactive_markers.interactive_marker_server import InteractiveMarkerServer, InteractiveMarker
-from viz.visualizer import FRAME_ID
-from std_msgs.msg import Header, ColorRGBA
-from geometry_msgs.msg import Quaternion, Pose, Point, Vector3
+from geometry_msgs.msg import Point, Pose, Quaternion, Vector3
+from interactive_markers.interactive_marker_server import (
+    InteractiveMarker, InteractiveMarkerServer)
 from robot_kinematics.msg import IKMarker
+from std_msgs.msg import ColorRGBA, Header
+from visualization_msgs.msg import InteractiveMarkerControl, Marker
+
+from viz import FRAME_ID
 
 
 class VizManager:
