@@ -2,12 +2,12 @@ import copy
 
 import numpy as np
 from rk.robot_preset.biped_robot import biped_ro, half_sitting_biped_ro
-from rk.utils import LinkNode, ToRad, rpy2rot
+from rk.utils import LinkNode, ToRad, rpy2rot, find_route
 
 
 def test_jacobian_setting():
     ro = copy.deepcopy(biped_ro)
-    idx = ro.find_route(7)
+    idx = find_route(ro.ulink, 7)
     ro.set_joint_angles(idx, [0, 0, -np.math.pi/6, np.math.pi/3, -np.math.pi/6, 0])
     J = ro.calc_Jacobian(idx)
     dq = np.linalg.solve(J, np.array([0, 0, 0.1, 0, 0, 0]).T)
@@ -15,7 +15,7 @@ def test_jacobian_setting():
 
 def test_singular_postures():
     ro = copy.deepcopy(biped_ro)
-    idx = ro.find_route(7)
+    idx = find_route(ro.ulink, 7)
     ro.set_joint_angles(idx, [0, 0, -np.math.pi/6, np.math.pi/3, np.math.pi/3, 0])
     J = ro.calc_Jacobian(idx)
     np.testing.assert_almost_equal(np.linalg.det(J), 8.907937896779329e-18)

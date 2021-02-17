@@ -7,7 +7,6 @@ from visualization_msgs.msg import Marker, MarkerArray, InteractiveMarkerControl
 from interactive_markers.interactive_marker_server import InteractiveMarkerServer, InteractiveMarker
 from tf.transformations import quaternion_from_euler
 import pickle
-import socket
 
 FRAME_ID = 'viz_frame'
 
@@ -15,16 +14,8 @@ def processFeedback(feedback):
     p = feedback.pose.position
     print(feedback.marker_name + " is now at " + str(p.x) + ", " + str(p.y) + ", " + str(p.z))
 
-HOST = '127.0.0.1'
-PORT = 3000
-
 def visualizer():
     rospy.init_node('visualizer', anonymous=True)
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.bind((HOST, PORT))
-    server_socket.listen(5)
-    client_socket, addr = server_socket.accept()
-    print('Connected by', addr)
 
     pub = rospy.Publisher('viz_marker', MarkerArray, queue_size=10)
 
@@ -65,13 +56,10 @@ def visualizer():
     # 'commit' changes and send to all clients
     im_server.applyChanges()
 
-
-
     rate = rospy.Rate(10)
 
     marker_array = MarkerArray()
     while not rospy.is_shutdown():
-        ulink = client_socket.recv(1024 * 8)
 
         if ulink:
             data = pickle.loads(ulink)
@@ -89,43 +77,6 @@ def visualizer():
                 )
                 joint_list.append(marker)
                 marker_array.markers.append(marker)
-
-                # Add gizmos
-
-                x_gizmo = Marker(
-                    header=Header(frame_id='my_frame', stamp=rospy.Time.now()),
-                    id=91,
-                    type=Marker.ARROW,
-                    action=Marker.ADD,
-                    pose=Pose(Point(-2, -2, 0), Quaternion(*quaternion_from_euler(0, 0, 0))),
-                    scale=Vector3(1, 0.1, 0.05),
-                    color=ColorRGBA(1, 0, 0, 1),
-                    lifetime=rospy.Duration()                    
-                )
-                y_gizmo = Marker(
-                    header=Header(frame_id='my_frame', stamp=rospy.Time.now()),
-                    id=92,
-                    type=Marker.ARROW,
-                    action=Marker.ADD,
-                    pose=Pose(Point(-2, -2, 0), Quaternion(*quaternion_from_euler(0, 0, np.math.pi/2))),
-                    scale=Vector3(1, 0.1, 0.05),
-                    color=ColorRGBA(0, 1, 0, 1),
-                    lifetime=rospy.Duration()                    
-                )
-                z_gizmo = Marker(
-                    header=Header(frame_id='my_frame', stamp=rospy.Time.now()),
-                    id=93,
-                    type=Marker.ARROW,
-                    action=Marker.ADD,
-                    pose=Pose(Point(-2, -2, 0), Quaternion(*quaternion_from_euler(0, -np.math.pi/2, 0))),
-                    scale=Vector3(1, 0.1, 0.05),
-                    color=ColorRGBA(0, 0, 1, 1),
-                    lifetime=rospy.Duration()                    
-                )
-
-                marker_array.markers.append(x_gizmo)
-                marker_array.markers.append(y_gizmo)
-                marker_array.markers.append(z_gizmo)
             
             # link
             line_list = Marker(
