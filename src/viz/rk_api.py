@@ -34,7 +34,7 @@ def rk_api():
 
         if ik_target:
             for link_id in ik_target:
-                ro.inverse_kinematics_LM(int(link_id), LinkNode(id=-1, name=link_id + '_target', p=ik_target[link_id], R=rpy2rot(0, 0, 0)))
+                ro.inverse_kinematics_LM(int(link_id), LinkNode(id=-1, name=link_id + '_target', p=ik_target[link_id], R=rpy2rot(0, 0, 0))) # R4,5,6 Rotation 구현상 편하려면 IK target or rotation
 
         marker_array = ulink_to_marker_array(ro.ulink)
         pub.publish(marker_array)
