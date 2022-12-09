@@ -1,7 +1,5 @@
 # Robot-Kinematics
 
-WIP
-
 ## Setup
 
 Currently, this repo is not published to ROS package, but it can be treated similar as ROS packages.
